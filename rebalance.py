@@ -2,11 +2,21 @@
 import sys, os, time
 from lightning.lightning import LightningRpc, RpcError
 from pathlib import Path
+from datetime import timedelta, datetime
+
+ts_format='%Y-%m-%d %H:%M:%S'
+
+def is_recent(line):
+	ts = datetime.strptime(line.split(': ')[0], ts_format)
+	rv = datetime.now() - ts < timedelta(seconds=24*60*60)
+	return rv
 
 def find_route(target, source, msatoshi, my_node_id):
-	text = ""
+	logs = ""
 	try:
-		text = open(os.path.splitext(sys.argv[0])[0] + ".log", "r").read()
+		f = open(os.path.splitext(sys.argv[0])[0] + ".log", "r")
+		lines = [line for line in f.readlines() if is_recent(line)]
+		logs = " ".join(line.strip() for line in lines)
 	except:
 		pass
 	try:
@@ -14,7 +24,7 @@ def find_route(target, source, msatoshi, my_node_id):
 			route = l.getroute(target, msatoshi, riskfactor=1, cltv=9, fromid=source)
 			if any(r['id'] == my_node_id for r in route['route']):
 				continue
-			if any(r['channel'] in text for r in route['route']):
+			if any(r['channel'] in logs for r in route['route']):
 				continue
 			return route['route']
 	except:
@@ -99,7 +109,14 @@ for i in range(5):
 		logfile = os.path.splitext(sys.argv[0])[0] + ".log"
 		print("%d. attempt failed, writing logs to %s"%(i + 1, logfile))
 		with open(logfile, 'a') as outfile:
-			outfile.write("%s\n"%str(e))
+			ts = datetime.now().strftime(ts_format)
+			outfile.write("%s: %s\n"%(ts, str(e)))
+		if incoming_node_id in str(e):
+			print("Error with incoming node, exiting.")
+			break
+		if outgoing_node_id in str(e):
+			print("Error with outgoing node, exiting.")
+			break
 	except KeyboardInterrupt:
 		print("\n%d. attempt skipped"%(i + 1))
 print("Redistribute FAILED")
