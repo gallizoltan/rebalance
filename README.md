@@ -1,4 +1,6 @@
-# Lightning Channel rebalancing tool for c-lightning
+## Go to [rebalance c-lightning plugin](https://github.com/lightningd/plugins/tree/master/rebalance) for the latest version of rebalance. The version here is still functional but is no longer under active development.
+
+## Lightning Channel rebalancing tool for c-lightning
 This tool helps to rebalance [Lightning Network](https://en.wikipedia.org/wiki/Lightning_Network) channel liquidity between two of your channels. Tested with c-lightning 0.7.0.
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
